@@ -89,15 +89,15 @@
     </div>
 
     <script type="module">
-        // Firebase Imports
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
 
-        document.addEventListener('DOMContentLoaded', async function () {
-            // --- FIREBASE SETUP ---
-            // STEP 1: Replace this object with your own Firebase config object from the Firebase console.
-            const firebaseConfig = {
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
     apiKey: "AIzaSyDVapxR3iChP7DUC6dpUljrsmJSafRnHEs",
     authDomain: "ecoonline-video-strategy.firebaseapp.com",
     projectId: "ecoonline-video-strategy",
@@ -107,11 +107,10 @@
     measurementId: "G-D54RCB5Z0R"
   };
 
-            // Initialize Firebase
-            const app = initializeApp(firebaseConfig);
-            const db = getFirestore(app);
-            const auth = getAuth(app);
-            
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
             try {
                 await signInAnonymously(auth);
             } catch (error) {
@@ -351,28 +350,4 @@
     </script>
 </body>
 </html>
-```
-
-### Next Steps: Your 5-Minute Firebase Setup
-
-Follow these exact steps to get your project online.
-
-1.  **Create a Firebase Project:**
-    * Go to the [Firebase website](https://firebase.google.com/) and click **"Go to console"**.
-    * Click **"Create a project"**, give it a name (like "My Content Plan"), and follow the on-screen steps.
-
-2.  **Create Your Database:**
-    * Once in your project, click **Build > Firestore Database** from the left menu.
-    * Click **"Create database"**. Start in **production mode**.
-    * Go to the **"Rules"** tab at the top. Paste the following rules and click **"Publish"**. This allows anyone using your app to read and write data.
-        ```
-        rules_version = '2';
-        service cloud.firestore {
-          match /databases/{database}/documents {
-            match /contentPlan/{docId} {
-              allow read, write: if request.auth != null;
-            }
-          }
-        }
-        
 
