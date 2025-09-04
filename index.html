@@ -257,10 +257,7 @@
                 });
                 checkbox.addEventListener('change', () => {
                     contentData[index].status = checkbox.checked ? 'complete' : undefined;
-                    // Clear the URL if unchecked
-                    if (!checkbox.checked) {
-                        contentData[index].videoUrl = undefined;
-                    }
+                    // ** CHANGE IS HERE: URL is no longer cleared when unchecked **
                     saveData();
                     renderAll();
                 });
