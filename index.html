@@ -50,7 +50,7 @@
              <p class="text-center text-gray-600 mb-6">This strategy centers on a new, ownable AI character: the **EcoOnline Safety Canary**. This character, a witty and knowledgeable canary in a tiny hard hat, will deliver daily safety tips. The humor comes from the contrast between a small, charming bird and serious, expert advice. This approach is designed to be highly shareable, memorable, and directly ties into the EcoOnline brand story of the "canary in the coal mine" being set free.</p>
              <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-center text-sm">
                  <div class="bg-green-50 p-4 rounded-lg">
-                     <h4 class="font-bold text-[#004D40]">Pillar-Driven Daily Shorts</h4>
+                     <hh4 class="font-bold text-[#004D40]">Pillar-Driven Daily Shorts</h4>
                      <p class="text-gray-700 mt-1">Each day of the week will be dedicated to one of the five core product pillars, ensuring balanced coverage while delivering consistent value.</p>
                  </div>
                   <div class="bg-green-50 p-4 rounded-lg">
@@ -189,9 +189,11 @@
 
             let contentData = [];
 
-            async function saveData(newData) {
+            function saveData(newData) {
+                // This function now saves the entire state to Firestore.
+                // It's called after any user interaction.
                 try {
-                    await setDoc(planDocRef, { plan: newData });
+                    setDoc(planDocRef, { plan: newData });
                 } catch (error) {
                     console.error("Error saving data to Firestore:", error);
                 }
@@ -273,21 +275,27 @@
                 container.appendChild(button);
                 container.appendChild(content);
 
+                // --- EVENT LISTENERS ---
                 const checkbox = button.querySelector('input[type="checkbox"]');
                 checkbox.addEventListener('click', (e) => e.stopPropagation());
                 checkbox.addEventListener('change', () => {
-                    const newData = [...contentData];
-                    newData[index].status = checkbox.checked ? 'complete' : undefined;
-                    // Keep URL even when unchecked
-                    saveData(newData);
+                    // Update the local data immediately for a snappy UI
+                    contentData[index].status = checkbox.checked ? 'complete' : undefined;
+                    // Then, save the entire updated list to Firebase
+                    saveData(contentData);
+                    // And finally, re-render the whole UI to reflect the change
+                    renderAll(contentData);
                 });
 
                 if(isComplete) {
                     const urlInput = content.querySelector('input[type="text"]');
                     urlInput.addEventListener('change', (e) => {
-                         const newData = [...contentData];
-                         newData[index].videoUrl = e.target.value;
-                         saveData(newData);
+                         // Update local data
+                         contentData[index].videoUrl = e.target.value;
+                         // Save to Firebase
+                         saveData(contentData);
+                         // Re-render UI
+                         renderAll(contentData);
                     });
                      urlInput.addEventListener('click', (e) => e.stopPropagation());
                 }
@@ -312,16 +320,22 @@
             const month3Container = document.getElementById('month3-scripts');
             
             function renderAll(data) {
+                // Keep track of which accordion was open to restore its state after re-rendering
                 const openItemIndex = Array.from(document.querySelectorAll('.accordion-content')).findIndex(el => el.style.maxHeight);
+                
+                // Clear all containers before re-drawing
                 month1Container.innerHTML = '';
                 month2Container.innerHTML = '';
                 month3Container.innerHTML = '';
+
                 data.forEach((item, index) => {
                     const accordionItem = createAccordionItem(item, index);
                     if (item.week <= 4) month1Container.appendChild(accordionItem);
                     else if (item.week > 4 && item.week <= 8) month2Container.appendChild(accordionItem);
                     else if (item.week > 8 && item.week <= 12) month3Container.appendChild(accordionItem);
                 });
+
+                // Restore the open accordion
                 if (openItemIndex > -1) {
                     const allItems = document.querySelectorAll('.accordion-content');
                     if (allItems[openItemIndex]) {
@@ -334,15 +348,19 @@
                 }
             }
             
-            // Listen for real-time updates
+            // --- REAL-TIME LISTENER ---
+            // This is the core of the collaboration feature.
+            // It listens for any changes in the database and automatically calls renderAll()
             onSnapshot(planDocRef, (doc) => {
                 if (doc.exists() && doc.data().plan) {
+                    // If we have data in the database, use it
                     contentData = doc.data().plan;
                 } else {
-                    // If doc doesn't exist or is empty, create it with default data
+                    // If the database is empty, populate it with the default data
                     contentData = defaultContentData;
                     saveData(contentData);
                 }
+                // Render the UI with the latest data from the database
                 renderAll(contentData);
             }, (error) => {
                 console.error("Error getting document:", error);
@@ -351,5 +369,4 @@
     </script>
 </body>
 </html>
-
 
